@@ -1,0 +1,534 @@
+
+/* ===== TURBO KART 3D: DISEÑO MÓVIL HORIZONTAL ===== */
+
+:root {
+  font-family: system-ui, Arial, sans-serif;
+  color: #fff;
+  background: #101722;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  max-width: none;
+  border: 0;
+  text-align: initial;
+}
+
+.game {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+  background: #9dc8df;
+}
+
+/* Circuito 3D a pantalla completa */
+#viewport {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#viewport canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+}
+
+/* Panel superior */
+.hud {
+  position: absolute;
+  z-index: 2;
+  top: max(8px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+  text-shadow: 0 2px 8px #0009;
+}
+
+.eyebrow {
+  display: block;
+  color: #dbeafe;
+  font-size: clamp(9px, 1.6vw, 12px);
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.hud h1 {
+  margin: 2px 0 0;
+  color: #fff;
+  font-size: clamp(19px, 4vw, 34px);
+  font-weight: 1000;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.hud h1 span {
+  color: #35e6ff;
+}
+
+/* PANEL DIGITAL DE VELOCIDAD Y TURBO */
+.speed-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
+  width: clamp(115px, 19vw, 170px);
+  padding: 7px 10px;
+  border: 1px solid #35e6ff80;
+  border-radius: 11px;
+  background: linear-gradient(145deg, #101c2beF, #07111feF);
+  box-shadow:
+    0 0 12px #00cfff25,
+    inset 0 0 12px #35e6ff12;
+}
+
+.speed-box {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 6px;
+  color: #fff;
+  white-space: nowrap;
+  text-shadow: 0 0 10px #35e6ff55;
+}
+
+.speed-box strong {
+  color: #ffffff;
+  font-size: clamp(27px, 5vw, 42px);
+  line-height: 1;
+  font-weight: 1000;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+}
+
+.speed-box span {
+  color: #35e6ff;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+/* Indicador de turbo */
+.turbo-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.turbo-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #35e6ff;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.turbo-heading strong {
+  color: #fff;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.turbo-track {
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border: 1px solid #ffffff35;
+  border-radius: 10px;
+  background: #050b14;
+}
+
+#turbo-fill {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #087cff, #35e6ff);
+  box-shadow: 0 0 8px #35e6ff;
+  transition: width 0.12s linear;
+}
+
+#turbo-fill.turbo-active {
+  background: linear-gradient(90deg, #ff8a00, #ffe45e);
+  box-shadow: 0 0 10px #ff9d00;
+}
+
+/* Información de carrera */
+.race-info {
+  position: absolute;
+  z-index: 2;
+  top: clamp(54px, 12vh, 78px);
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 7px 10px;
+  border: 1px solid #ffffff38;
+  border-radius: 9px;
+  background: #101722a8;
+  color: #fff;
+  font-size: clamp(10px, 1.8vw, 14px);
+  font-weight: 700;
+  text-shadow: 0 1px 3px #0008;
+  pointer-events: none;
+}
+
+.race-info b {
+  color: #35e6ff;
+}
+
+/* Controles: siempre dentro de la pantalla */
+.mobile-controls {
+  position: absolute;
+  z-index: 5;
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.steering,
+.driving {
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(7px, 1.5vw, 14px);
+  pointer-events: auto;
+}
+
+.steering {
+  position: relative;
+  width: clamp(130px, 24vw, 190px);
+  height: clamp(125px, 26vh, 180px);
+  flex-shrink: 0;
+}
+
+#steering-zone {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+  pointer-events: auto;
+}
+
+#steering-base {
+  position: absolute;
+  display: none;
+  width: 112px;
+  height: 112px;
+  border: 2px solid #ffffff85;
+  border-radius: 50%;
+  background: #10172265;
+  box-shadow: 0 4px 18px #0005;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+#steering-zone.active #steering-base {
+  display: block;
+}
+
+#steering-stick {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 54px;
+  height: 54px;
+  border: 2px solid #ffffffbd;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #35e6ffed, #1677ffed);
+  box-shadow: 0 3px 12px #0008;
+  transform: translate(-50%, -50%);
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 46px;
+  padding: 10px 14px;
+  border: 1px solid #ffffff65;
+  border-radius: 12px;
+  background: #111b2ddd;
+  color: #fff;
+  font-size: clamp(12px, 2vw, 17px);
+  font-weight: 900;
+  box-shadow: 0 4px 12px #0005;
+  touch-action: none;
+}
+
+.control.steer {
+  width: clamp(54px, 9vw, 78px);
+  height: clamp(52px, 12vh, 68px);
+  font-size: clamp(20px, 4vw, 30px);
+}
+
+.control.brake {
+  background: #b8323eeb;
+}
+.control.reverse {
+  min-width: 64px;
+  min-height: 52px;
+  padding: 8px;
+  border-color: #ffb347;
+  background: linear-gradient(145deg, #8a3d0b, #54230a);
+  color: #fff3d6;
+  font-size: 10px;
+  line-height: 1.3;
+  text-align: center;
+  box-shadow:
+    0 0 10px #ff9d0030,
+    inset 0 0 8px #ffcc3320;
+}
+
+.control.boost {
+  border-color: #35e6ff;
+  background: #075985ee;
+}
+
+.control.accelerate {
+  min-width: clamp(86px, 14vw, 126px);
+  height: clamp(62px, 15vh, 82px);
+  flex-direction: column;
+  gap: 3px;
+  background: linear-gradient(145deg, #0e9f6e, #047857);
+  font-size: clamp(12px, 2vw, 17px);
+}
+
+.control.pressed {
+  filter: brightness(1.4);
+  transform: scale(0.96);
+}
+
+/* Mensaje y selección del vehículo */
+.garage {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  max-width: 42%;
+  padding: 8px;
+  border-radius: 10px;
+  background: #1017229c;
+  transform: translateY(-50%);
+  pointer-events: auto;
+}
+
+.garage .eyebrow {
+  font-size: 9px;
+}
+
+#kart-name {
+  font-size: clamp(12px, 2vw, 18px);
+  color: #fff;
+}
+
+#change-kart {
+  padding: 6px 9px;
+  border: 1px solid #ffffff70;
+  border-radius: 7px;
+  background: #ffffffed;
+  color: #101722;
+  font-size: clamp(10px, 1.5vw, 13px);
+  font-weight: 900;
+}
+
+.race-message {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: max(88px, calc(env(safe-area-inset-bottom) + 76px));
+  width: max-content;
+  max-width: 55%;
+  padding: 6px 12px;
+  border: 1px solid #ffffff38;
+  border-radius: 8px;
+  background: #101722a8;
+  color: #fff;
+  text-align: center;
+  font-size: clamp(10px, 1.7vw, 14px);
+  font-weight: 800;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.game footer {
+  display: none;
+}
+
+/* Pantalla de inicio */
+#orientation-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: radial-gradient(ellipse at top, #263f5e, #101722 72%);
+  color: #fff;
+  font-family: system-ui, sans-serif;
+}
+
+.start-panel {
+  width: min(100%, 420px);
+  text-align: center;
+}
+
+.start-logo {
+  margin-bottom: 8px;
+  font-size: 58px;
+}
+
+#orientation-gate h2 {
+  margin: 8px 0;
+  color: #fff;
+  font-size: clamp(25px, 5vw, 40px);
+  font-weight: 900;
+}
+
+#orientation-gate p {
+  margin: 12px 0;
+  color: #cbd5e1;
+}
+
+#orientation-hint {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#start-game {
+  width: min(100%, 280px);
+  margin-top: 18px;
+  padding: 15px 24px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #00e5ff, #1677ff);
+  color: #07111f;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+#start-game:active {
+  transform: scale(0.97);
+}
+
+#orientation-gate.start-hidden {
+  display: none;
+}
+
+/* Teléfonos en horizontal y pantallas de poca altura */
+@media (orientation: landscape) and (max-height: 500px) {
+  .race-info {
+    top: 60px;
+  }
+
+  .garage {
+    top: 42%;
+    right: 10px;
+  }
+
+  .mobile-controls {
+    bottom: max(8px, env(safe-area-inset-bottom));
+  }
+
+  .race-message {
+    bottom: max(76px, calc(env(safe-area-inset-bottom) + 66px));
+  }
+}
+
+/* Pantallas muy estrechas */
+@media (max-width: 600px) {
+  .mobile-controls {
+    gap: 6px;
+  }
+
+  .steering,
+  .driving {
+    gap: 6px;
+  }
+
+  .control {
+    padding: 8px;
+  }
+
+  .garage {
+    right: 6px;
+  }
+
+  .race-message {
+    max-width: 48%;
+  }
+}
+/* Indicador luminoso de derrape */
+#status.drift-active {
+  color: #ffb347;
+  text-shadow:
+    0 0 5px #ff8c00,
+    0 0 12px #ff5e00;
+  animation: driftPulse 0.65s ease-in-out infinite alternate;
+}
+
+@keyframes driftPulse {
+  from {
+    opacity: 0.75;
+    filter: brightness(1);
+  }
+
+  to {
+    opacity: 1;
+    filter: brightness(1.5);
+  }
+}
